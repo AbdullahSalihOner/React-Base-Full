@@ -1,70 +1,94 @@
-# Getting Started with Create React App
+# Understanding useEffect Types in React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+The `useEffect` Hook in React is a crucial tool for handling side effects in functional components. There are three main types of useEffect implementations, each serving different purposes.
 
-## Available Scripts
+## Types of useEffect
 
-In the project directory, you can run:
+### 1. useEffect with No Dependency Array
+```jsx
+useEffect(() => {
+  console.log('This runs after every render');
+});
+```
+- Runs after every render
+- Used when you need to perform an effect that depends on every update
+- **Example Use Case**: Logging component updates or tracking real-time changes
 
-### `npm start`
+### 2. useEffect with Empty Dependency Array
+```jsx
+useEffect(() => {
+  console.log('This runs only once after initial render');
+}, []);
+```
+- Runs only once after the initial render
+- Similar to `componentDidMount` in class components
+- **Example Use Case**: Initial data fetching, subscriptions, or one-time setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 3. useEffect with Dependencies
+```jsx
+useEffect(() => {
+  console.log(`This runs when count changes: ${count}`);
+}, [count]);
+```
+- Runs when specified dependencies change
+- Optimizes performance by preventing unnecessary effect executions
+- **Example Use Case**: Updating derived state or responding to prop/state changes
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Practical Examples
 
-### `npm test`
+### 1. Continuous Update Example
+```jsx
+function Timer() {
+  const [time, setTime] = useState(new Date());
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  });
 
-### `npm run build`
+  return <div>Current time: {time.toLocaleTimeString()}</div>;
+}
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. One-time Setup Example
+```jsx
+function DataFetcher() {
+  const [data, setData] = useState(null);
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+  useEffect(() => {
+    fetch('https://api.example.com/data')
+      .then(response => response.json())
+      .then(data => setData(data));
+  }, []);
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  return <div>{data ? JSON.stringify(data) : 'Loading...'}</div>;
+}
+```
 
-### `npm run eject`
+### 3. Dependent Update Example
+```jsx
+function SearchResults({ query }) {
+  const [results, setResults] = useState([]);
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+  useEffect(() => {
+    if (query) {
+      fetchSearchResults(query).then(data => setResults(data));
+    }
+  }, [query]);
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  return <div>{results.map(result => <div key={result.id}>{result.title}</div>)}</div>;
+}
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Best Practices
+1. Always clean up side effects when necessary (using the return function)
+2. Keep dependencies array accurate to prevent bugs
+3. Avoid infinite loops by carefully managing dependencies
+4. Use appropriate dependency array type based on your use case
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Common Pitfalls to Avoid
+- Missing dependency array (causing infinite renders)
+- Incorrect dependencies in the dependency array
+- Not cleaning up side effects (memory leaks)
+- Using useEffect when not necessary
