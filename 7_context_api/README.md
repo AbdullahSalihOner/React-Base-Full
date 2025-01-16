@@ -1,70 +1,273 @@
-# Getting Started with Create React App
+# React Context API
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Context API Nedir?
 
-## Available Scripts
+Context API, React uygulamalarında prop drilling sorununu çözmek için geliştirilmiş bir state yönetim sistemidir. Prop drilling, verilerin üst bileşenden alt bileşenlere props aracılığıyla aktarılması sürecinde, arada bulunan ancak bu verilere ihtiyaç duymayan bileşenlere de props geçilmesi durumudur.
 
-In the project directory, you can run:
+## Context API'nin Amacı
 
-### `npm start`
+- Uygulama genelinde paylaşılması gereken verileri (tema, dil, kullanıcı bilgileri vb.) merkezi bir yerden yönetmek
+- Prop drilling sorununu ortadan kaldırmak
+- Bileşenler arası veri paylaşımını kolaylaştırmak
+- Kod tekrarını azaltmak
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Context API'nin Faydaları
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. **Basitlik**: Redux gibi karmaşık state yönetim sistemlerine göre daha basit bir API sunar
+2. **Entegrasyon Kolaylığı**: React'in built-in özelliği olduğu için ek paket gerektirmez
+3. **Performans**: Küçük ve orta ölçekli uygulamalar için yeterli performans sağlar
+4. **Kod Okunabilirliği**: Prop drilling'i azaltarak kodun daha okunabilir olmasını sağlar
 
-### `npm test`
+## Nasıl Kullanılır?
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Context Oluşturma
 
-### `npm run build`
+```javascript
+// context/task.js
+import { createContext } from 'react';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+const TaskContext = createContext();
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Provider Tanımlama
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```javascript
+function Provider({ children }) {
+  const [tasks, setTasks] = useState([]);
+  
+  const sharedValues = {
+    tasks,
+    setTasks
+  };
 
-### `npm run eject`
+  return (
+    <TaskContext.Provider value={sharedValues}>
+      {children}
+    </TaskContext.Provider>
+  );
+}
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 3. Provider'ı Uygulamaya Sarmalama
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```javascript
+// index.js
+import { Provider } from './context/task';
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+root.render(
+  <Provider>
+    <App />
+  </Provider>
+);
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 4. Context'i Kullanma
 
-## Learn More
+```javascript
+// herhangi bir bileşen
+import { useContext } from 'react';
+import TaskContext from './context/task';
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+function TaskList() {
+  const { tasks, setTasks } = useContext(TaskContext);
+  
+  return (
+    <div>
+      {tasks.map(task => (
+        <div key={task.id}>{task.title}</div>
+      ))}
+    </div>
+  );
+}
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Örnek Kullanım Senaryoları
 
-### Code Splitting
+1. **Tema Değiştirme**:
+```javascript
+const ThemeContext = createContext();
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+  
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+```
 
-### Analyzing the Bundle Size
+2. **Kullanıcı Yetkilendirme**:
+```javascript
+const AuthContext = createContext();
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  
+  const login = (userData) => {
+    setUser(userData);
+  };
+  
+  const logout = () => {
+    setUser(null);
+  };
+  
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+```
 
-### Making a Progressive Web App
+## Ne Zaman Kullanılmalı?
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Uygulama genelinde paylaşılması gereken veriler olduğunda
+- Prop drilling sorunu yaşandığında
+- Global state yönetimi gerektiğinde (küçük-orta ölçekli uygulamalar için)
+- Tema, dil, kullanıcı bilgileri gibi genel verilerin yönetiminde
 
-### Advanced Configuration
+## Ne Zaman Kullanılmamalı?
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Çok büyük ölçekli uygulamalarda (Redux tercih edilebilir)
+- Sık güncellenen veriler için (performans sorunları yaşanabilir)
+- Sadece birkaç seviye prop geçişi varsa (normal props kullanımı yeterli olabilir)
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+# React Context API (English)
 
-### `npm run build` fails to minify
+## What is Context API?
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Context API is a state management system developed to solve the prop drilling problem in React applications. Prop drilling occurs when props need to be passed through intermediate components that don't need the data themselves, just to get it to lower components in the tree.
+
+## Purpose of Context API
+
+- Manage shared data (theme, language, user information, etc.) from a central location
+- Eliminate prop drilling issues
+- Facilitate data sharing between components
+- Reduce code repetition
+
+## Benefits of Context API
+
+1. **Simplicity**: Offers a simpler API compared to complex state management systems like Redux
+2. **Easy Integration**: No additional packages required as it's a built-in React feature
+3. **Performance**: Provides sufficient performance for small to medium-sized applications
+4. **Code Readability**: Improves code readability by reducing prop drilling
+
+## How to Use?
+
+### 1. Creating Context
+
+```javascript
+// context/task.js
+import { createContext } from 'react';
+
+const TaskContext = createContext();
+```
+
+### 2. Defining Provider
+
+```javascript
+function Provider({ children }) {
+  const [tasks, setTasks] = useState([]);
+  
+  const sharedValues = {
+    tasks,
+    setTasks
+  };
+
+  return (
+    <TaskContext.Provider value={sharedValues}>
+      {children}
+    </TaskContext.Provider>
+  );
+}
+```
+
+### 3. Wrapping Application with Provider
+
+```javascript
+// index.js
+import { Provider } from './context/task';
+
+root.render(
+  <Provider>
+    <App />
+  </Provider>
+);
+```
+
+### 4. Using Context
+
+```javascript
+// any component
+import { useContext } from 'react';
+import TaskContext from './context/task';
+
+function TaskList() {
+  const { tasks, setTasks } = useContext(TaskContext);
+  
+  return (
+    <div>
+      {tasks.map(task => (
+        <div key={task.id}>{task.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Example Use Cases
+
+1. **Theme Switching**:
+```javascript
+const ThemeContext = createContext();
+
+function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+  
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+```
+
+2. **User Authentication**:
+```javascript
+const AuthContext = createContext();
+
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  
+  const login = (userData) => {
+    setUser(userData);
+  };
+  
+  const logout = () => {
+    setUser(null);
+  };
+  
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+```
+
+## When to Use?
+
+- When you have data that needs to be shared across the application
+- When you're experiencing prop drilling issues
+- When you need global state management (for small to medium-sized applications)
+- For managing general data like themes, language, user information
+
+## When Not to Use?
+
+- In very large-scale applications (Redux might be preferred)
+- For frequently updating data (may cause performance issues)
+- When you only have a few levels of prop passing (normal props usage might be sufficient)
