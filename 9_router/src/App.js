@@ -38,7 +38,9 @@ function App() {
           <Route path="team" element={<Team />} />
         </Route>
         <Route path="/members" element={<Members />} />
+        {/* parametreli route --> react router'da parametreleri almak ve kullanmak icin kullanilir */}
         <Route path="/members/:memberId" element={<MemberDetail />} />
+        {/* yanlış yönlendirme olduğunda kullanılacak route */}
         <Route path="*" element={<WrongPath />} />
       </Routes>
      
