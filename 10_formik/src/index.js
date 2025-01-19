@@ -5,7 +5,6 @@ import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  //ikilmeye sebeb olur
   <React.StrictMode>
     <App />
   </React.StrictMode>
