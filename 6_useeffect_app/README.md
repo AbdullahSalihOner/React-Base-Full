@@ -38,6 +38,7 @@ useEffect(() => {
 ## Practical Examples
 
 ### 1. Continuous Update Example
+- all time render
 ```jsx
 function Timer() {
   const [time, setTime] = useState(new Date());
@@ -52,6 +53,7 @@ function Timer() {
 ```
 
 ### 2. One-time Setup Example
+- just one time to fetch data 
 ```jsx
 function DataFetcher() {
   const [data, setData] = useState(null);
@@ -67,6 +69,7 @@ function DataFetcher() {
 ```
 
 ### 3. Dependent Update Example
+- update when query changes
 ```jsx
 function SearchResults({ query }) {
   const [results, setResults] = useState([]);
